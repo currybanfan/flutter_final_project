@@ -1,3 +1,4 @@
+import 'supabase_provider.dart';
 import 'package:flutter/material.dart';
 import 'data.dart';
 import 'package:buttons_tabbar/buttons_tabbar.dart';
@@ -116,7 +117,7 @@ class VocabularyDialog extends StatelessWidget {
       title: Center(
         child: Text(
           entry?.word ?? "",
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
       ),
       content: SingleChildScrollView(
@@ -140,7 +141,8 @@ class VocabularyDialog extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          icon: Icon(Icons.volume_up),
+          icon: const Icon(Icons.volume_up),
+          color: Theme.of(context).colorScheme.primaryContainer,
           onPressed: () {
             var ttsModel = Provider.of<TtsModel>(context, listen: false);
             ttsModel.setVoiceText(entry?.word ?? "");
@@ -148,9 +150,12 @@ class VocabularyDialog extends StatelessWidget {
           },
         ),
         IconButton(
-          icon: Icon(Icons.note),
+          icon: const Icon(Icons.note),
+          color: Theme.of(context).colorScheme.primaryContainer,
           onPressed: () {
-            // 顯示 note 的功能
+            var supabase =
+                Provider.of<SupabaseProvider>(context, listen: false);
+            supabase.saveNote(entry);
           },
         ),
       ],

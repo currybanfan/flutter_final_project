@@ -46,6 +46,7 @@ class AuthPageState extends State<AuthPage> {
       }
     } catch (e) {
       if (context.mounted) {
+        print(e);
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('登入失敗 : $e')));
       }

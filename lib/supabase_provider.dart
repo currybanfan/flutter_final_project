@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
 import 'secure_storage.dart';
+import 'data.dart';
 
 class SupabaseProvider extends ChangeNotifier {
   final SupabaseClient _supabaseClient;
@@ -51,5 +52,23 @@ class SupabaseProvider extends ChangeNotifier {
     await _supabaseClient.auth.signOut();
     _currentUser = null;
     notifyListeners();
+  }
+
+  Future<void> saveNote(VocabularyEntry? entry) async {
+    final userId = _currentUser?.id;
+
+    if (userId != null && entry != null) {
+      final response = await _supabaseClient.from('notes').insert({
+        'user_id': userId,
+        'word': entry.word,
+        'definitions': entry.definitions.map((e) => e.text).join(', '),
+      });
+
+      if (response.error != null) {
+        print('Error saving word: ${response.error!.message}');
+      } else {
+        print('Word saved successfully');
+      }
+    }
   }
 }

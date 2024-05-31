@@ -8,30 +8,36 @@ import 'auth_page.dart';
 
 ThemeData lightTheme() {
   return ThemeData(
-      colorScheme: const ColorScheme(
-        primary: Color(0xFF6200EE), // Primary
-        primaryContainer: Color(0xFF3700B3), // Primary Variant
-        secondary: Color(0xFF03DAC6), // Secondary
-        secondaryContainer: Color(0xFF018786), // Secondary Variant
-        surface: Color(0xFFFFFFFF), // Surface
-        error: Color(0xFFB00020), // Error
-        onPrimary: Color(0xFFFFFFFF), // On Primary
-        onSecondary: Color(0xFF000000), // On Secondary
-        onSurface: Color(0xFF000000), // On Surface
-        onError: Color(0xFFFFFFFF), // On Error
+      colorScheme: ColorScheme(
+        primary: Colors.deepPurple, // Primary
+        primaryContainer: Colors.deepPurple.shade900, // Primary Variant
+        secondary: Colors.purple, // Secondary
+        secondaryContainer: Colors.purple.shade700, // Secondary Variant
+        surface: Colors.white, // Surface
+        error: Colors.red, // Error
+        onPrimary: Colors.white, // On Primary
+        onSecondary: Colors.black, // On Secondary
+        onSurface: Colors.black, // On Surface
+        onError: Colors.white, // On Error
         brightness: Brightness.light,
       ),
       // 文字主題設定
       textTheme: const TextTheme(
+        bodyLarge: TextStyle(
+          fontFamily: 'Arial', // 字體
+          color: Colors.black,
+          fontWeight: FontWeight.bold, // 粗體
+          fontSize: 24, // 字體大小
+        ),
         bodyMedium: TextStyle(
           fontFamily: 'Arial', // 字體
-          color: Color(0xFF000000),
+          color: Colors.black,
           fontWeight: FontWeight.bold, // 粗體
           fontSize: 20, // 字體大小
         ),
         bodySmall: TextStyle(
           fontFamily: 'Arial', // 字體
-          color: Color(0xFF000000),
+          color: Colors.black,
           fontSize: 14, // 字體大小
         ),
         titleLarge: TextStyle(
@@ -39,7 +45,7 @@ ThemeData lightTheme() {
           fontFamily: 'Arial',
           fontSize: 24,
           fontWeight: FontWeight.bold, // 粗體
-          color: Color(0xFF000000),
+          color: Colors.white,
         ),
       ),
       // elevatedButtonTheme: ElevatedButtonThemeData(
@@ -113,7 +119,6 @@ class VocabularyAPP extends StatelessWidget {
 
     return MaterialApp(
       theme: lightTheme(),
-      // home: const MainPage(),
       initialRoute: '/',
       routes: {
         '/': (context) => supabaseProvider.isLoggedIn ? MainPage() : AuthPage(),
@@ -175,7 +180,10 @@ class MainPageState extends State<MainPage> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor:
+            Theme.of(context).colorScheme.primary.withOpacity(0.6),
         onTap: _onItemTapped,
       ),
     );
