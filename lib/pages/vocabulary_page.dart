@@ -1,10 +1,9 @@
-import 'supabase_provider.dart';
 import 'package:flutter/material.dart';
-import 'data.dart';
+import '../vocabulary.dart';
 import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'tts_model.dart';
 import 'package:provider/provider.dart';
+import '../providers/vocabulary_provider.dart';
 
 class VocabularyPage extends StatefulWidget {
   const VocabularyPage({super.key});
@@ -28,27 +27,26 @@ class VocabularyPageState extends State<VocabularyPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<VocabularyProvider>(context);
     final levels = provider.getLevels();
+    final theme = Theme.of(context);
 
     return DefaultTabController(
       length: levels.length,
       child: Column(
         children: [
-          const SizedBox(height: 40),
+          const SizedBox(height: 30),
           ButtonsTabBar(
             height: 50.0,
-            backgroundColor: Colors.grey.shade200,
-            unselectedBackgroundColor: Colors.grey.shade500,
-            labelStyle: TextStyle(
-              color: Colors.grey.shade900,
-              fontWeight: FontWeight.bold,
+            backgroundColor: theme.colorScheme.primary,
+            unselectedBackgroundColor: Colors.grey.shade300,
+            labelStyle: theme.textTheme.bodySmall!.copyWith(
+              color: theme.colorScheme.onPrimary,
             ),
-            unselectedLabelStyle: TextStyle(
-              color: Colors.grey.shade900,
-              fontWeight: FontWeight.bold,
+            unselectedLabelStyle: theme.textTheme.bodySmall!.copyWith(
+              color: theme.colorScheme.onSurface,
             ),
             borderWidth: 2,
-            borderColor: Colors.grey.shade500,
-            unselectedBorderColor: Colors.grey.shade200,
+            borderColor: theme.colorScheme.primaryContainer,
+            unselectedBorderColor: theme.colorScheme.onSurface,
             radius: 100,
             tabs: levels
                 .map(
@@ -64,25 +62,26 @@ class VocabularyPageState extends State<VocabularyPage> {
               });
             },
           ),
+          const SizedBox(height: 5),
           Expanded(
             child: TabBarView(
               children: levels.map((level) {
                 var vocabularyList = provider.getVocabulary(level);
                 return vocabularyList == null
-                    ? Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator())
                     : ListView.separated(
                         itemCount: vocabularyList.length,
-                        separatorBuilder: (context, index) => Divider(),
+                        separatorBuilder: (context, index) => const Divider(),
                         itemBuilder: (context, index) {
                           var entry = vocabularyList[index];
                           return ListTile(
                             title: Text(
                               entry.word,
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              style: theme.textTheme.bodyLarge,
                             ),
                             subtitle: Text(
                               entry.definitions.map((e) => e.text).join(', '),
-                              style: Theme.of(context).textTheme.bodySmall,
+                              style: theme.textTheme.bodySmall,
                             ),
                             onTap: () => _showVocabularyDialog(context, entry),
                           );
@@ -102,63 +101,6 @@ class VocabularyPageState extends State<VocabularyPage> {
       builder: (BuildContext context) {
         return VocabularyDialog(entry: entry);
       },
-    );
-  }
-}
-
-class VocabularyDialog extends StatelessWidget {
-  final VocabularyEntry? entry;
-
-  const VocabularyDialog({super.key, required this.entry});
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Center(
-        child: Text(
-          entry?.word ?? "",
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: [
-            Center(
-              child: Text(
-                entry?.definitions.map((e) => e.partOfSpeech).join(', ') ?? "",
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-            const SizedBox(height: 5.0),
-            Center(
-              child: Text(
-                entry?.definitions.map((e) => e.text).join(', ') ?? "",
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.volume_up),
-          color: Theme.of(context).colorScheme.primaryContainer,
-          onPressed: () {
-            var ttsModel = Provider.of<TtsModel>(context, listen: false);
-            ttsModel.setVoiceText(entry?.word ?? "");
-            ttsModel.speak();
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.note),
-          color: Theme.of(context).colorScheme.primaryContainer,
-          onPressed: () {
-            var supabase =
-                Provider.of<SupabaseProvider>(context, listen: false);
-            supabase.saveNote(entry);
-          },
-        ),
-      ],
     );
   }
 }

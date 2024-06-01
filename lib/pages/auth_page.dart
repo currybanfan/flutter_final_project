@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'supabase_provider.dart';
+import '../providers/supabase_provider.dart';
+import '../snack_bar.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -17,18 +18,14 @@ class AuthPageState extends State<AuthPage> {
     try {
       final supabaseProvider =
           Provider.of<SupabaseProvider>(context, listen: false);
-      await supabaseProvider.signUp(
+      final response = await supabaseProvider.signUp(
           _emailController.text, _passwordController.text);
-
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('註冊成功')));
+        showTopSnackBar(context, response, SnackBarType.success);
       }
     } catch (e) {
-      print(e.toString());
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('註冊失敗 : $e')));
+        showTopSnackBar(context, e.toString(), SnackBarType.failure);
       }
     }
   }
@@ -37,27 +34,34 @@ class AuthPageState extends State<AuthPage> {
     try {
       final supabaseProvider =
           Provider.of<SupabaseProvider>(context, listen: false);
-      await supabaseProvider.signIn(
+      final response = await supabaseProvider.signIn(
           _emailController.text, _passwordController.text);
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('登入成功')));
+        showTopSnackBar(context, response, SnackBarType.success);
         Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
       if (context.mounted) {
-        print(e);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('登入失敗 : $e')));
+        showTopSnackBar(context, e.toString(), SnackBarType.failure);
       }
+    }
+  }
+
+  void _guestSignIn() {
+    if (context.mounted) {
+      showTopSnackBar(context, '成功以訪客身份登入', SnackBarType.success);
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('註冊和登入'),
+        title: Text('註冊和登入', style: theme.textTheme.titleLarge),
+        backgroundColor: theme.colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -72,6 +76,7 @@ class AuthPageState extends State<AuthPage> {
               decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -84,6 +89,11 @@ class AuthPageState extends State<AuthPage> {
                   child: Text('登入'),
                 ),
               ],
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _guestSignIn,
+              child: Text('訪客登入'),
             ),
           ],
         ),
