@@ -6,6 +6,7 @@ import 'providers/supabase_provider.dart';
 import 'pages/auth_page.dart';
 import 'pages/notes_page.dart';
 import 'pages/home_page.dart';
+import 'pages/test_page.dart';
 
 ThemeData lightTheme() {
   return ThemeData(
@@ -21,6 +22,7 @@ ThemeData lightTheme() {
         onSurface: Colors.black, // On Surface
         onError: Colors.white, // On Error
         brightness: Brightness.light,
+        surfaceDim: Colors.grey.shade300,
       ),
       // 文字主題設定
       textTheme: const TextTheme(
@@ -60,12 +62,12 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => VocabularyProvider(),
-        ),
-        ChangeNotifierProvider(
           create: (context) => SupabaseProvider(
               'https://tttrhsxgnrltekfgbfrx.supabase.co', supabaseKey),
         ),
+        ChangeNotifierProvider(
+            create: (context) =>
+                VocabularyProvider(context.read<SupabaseProvider>())),
       ],
       child: const VocabularyAPP(),
     ),
@@ -83,8 +85,9 @@ class VocabularyAPP extends StatelessWidget {
       theme: lightTheme(),
       initialRoute: '/',
       routes: {
-        '/': (context) => supabaseProvider.isLoggedIn ? MainPage() : AuthPage(),
-        '/home': (context) => MainPage(),
+        '/': (context) =>
+            supabaseProvider.isLoggedIn ? const MainPage() : const AuthPage(),
+        '/home': (context) => const MainPage(),
       },
     );
   }
@@ -102,9 +105,9 @@ class MainPageState extends State<MainPage> {
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   final List<Widget> _widgetOptions = [
+    HomePage(),
     VocabularyPage(),
     NotesPage(),
-    HomePage(),
   ];
 
   void _onItemTapped(int index) {
@@ -123,15 +126,15 @@ class MainPageState extends State<MainPage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.text_fields),
             label: 'Vocabulary',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.edit_note_rounded),
             label: 'Notes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
           ),
         ],
         currentIndex: _selectedIndex,
