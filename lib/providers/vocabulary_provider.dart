@@ -71,7 +71,7 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  Future<VocabularyEntry?> loadRandomEntry(List<String> levels) async {
+  Future<VocabularyEntry> loadRandomEntry(List<String> levels) async {
     List<VocabularyEntry> allEntries = [];
 
     try {
@@ -88,7 +88,8 @@ class VocabularyProvider extends ChangeNotifier {
     if (allEntries.isNotEmpty) {
       final random = Random();
       return allEntries[random.nextInt(allEntries.length)];
+    } else {
+      throw ('找不到單字');
     }
-    return null;
   }
 }

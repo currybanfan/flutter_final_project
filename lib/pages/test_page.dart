@@ -20,8 +20,6 @@ class TestPageState extends State<TestPage> with TickerProviderStateMixin {
   TextEditingController _controller = TextEditingController();
   bool _isCorrect = true;
   String _displayedText = '';
-  final int _letterCount = 5; // Example letter count
-
   late final VocabularyProvider vocabularyProvider;
 
   @override
@@ -36,12 +34,18 @@ class TestPageState extends State<TestPage> with TickerProviderStateMixin {
   void _onTextChanged() {
     setState(() {
       _updateDisplayedText(_controller.text);
+      if (_controller.text.length == _randomEntry?.letterCount) {
+        _isCorrect = _controller.text == _randomEntry?.word;
+      } else {
+        _isCorrect = true;
+      }
     });
   }
 
   void _updateDisplayedText(String text) {
     int inputLetterCount = text.length;
-    int remainingBottomLine = _letterCount - inputLetterCount;
+    int remainingBottomLine =
+        (_randomEntry?.letterCount ?? 0) - inputLetterCount;
     String blankField = '';
 
     for (int i = 0; i < remainingBottomLine; i++) {
@@ -137,36 +141,28 @@ class TestPageState extends State<TestPage> with TickerProviderStateMixin {
                   style: theme.textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 10),
-                Container(
+                SizedBox(
                   height: 100,
                   child: Stack(
                     alignment: Alignment.bottomCenter,
                     children: [
-                      // 底線
-                      // Positioned.fill(
-                      //   child:
                       Align(
-                        // alignment: Alignment.centerLeft,
                         child: Text(
                           _displayedText,
-                          style: theme.textTheme.bodyLarge,
+                          style: theme.textTheme.bodyLarge!.copyWith(
+                              color: _isCorrect
+                                  ? theme.colorScheme.onSurface
+                                  : theme.colorScheme.error),
                         ),
                       ),
-                      // ),
                       // 隱形的輸入框
-                      Positioned.fill(
-                        child: Align(
-                          // alignment: Alignment.centerLeft,
-                          child: Opacity(
-                            opacity: 0.0,
-                            child: TextField(
-                              controller: _controller,
-                              autofocus: true,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '輸入單字',
-                              ),
-                            ),
+                      Align(
+                        child: Opacity(
+                          opacity: 0.0,
+                          child: TextField(
+                            controller: _controller,
+                            autofocus: false,
+                            maxLength: _randomEntry?.letterCount ?? 0,
                           ),
                         ),
                       ),
@@ -174,38 +170,34 @@ class TestPageState extends State<TestPage> with TickerProviderStateMixin {
                   ),
                 ),
                 const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isCorrect =
-                          _controller.text.trim() == _randomEntry!.word;
-                      _showResult = true;
-                    });
-                  },
-                  child: const Text('顯示答案'),
-                ),
-                const SizedBox(height: 10),
-                if (_showResult)
-                  Text(
-                    _isCorrect ? '答案正確！' : '正確答案: ${_randomEntry!.word}',
-                    style: TextStyle(
-                        color: _isCorrect ? Colors.green : Colors.red,
-                        fontSize: 16),
-                  ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () async {
-                    final entry = await vocabularyProvider
-                        .loadRandomEntry(_selectedLevels);
-                    setState(() {
-                      _randomEntry = entry;
-                      _showResult = false;
-                      _isCorrect = true;
-                      _controller.clear();
-                    });
-                  },
-                  child: const Text('下一題'),
-                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _controller.text = _randomEntry!.word;
+                        });
+                      },
+                      child: const Text('顯示答案'),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final entry = await vocabularyProvider
+                            .loadRandomEntry(_selectedLevels);
+                        setState(() {
+                          _randomEntry = entry;
+                          _showResult = false;
+                          _isCorrect = true;
+                          _controller.clear();
+                          _updateDisplayedText('');
+                        });
+                      },
+                      child: const Text('下一題'),
+                    ),
+                  ],
+                )
               ],
             ],
           );
