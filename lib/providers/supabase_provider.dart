@@ -100,9 +100,9 @@ class SupabaseProvider extends ChangeNotifier {
         }
         throw ('儲存失敗');
       }
+    } else {
+      throw ('無效的用戶或單字');
     }
-
-    throw ('無效的用戶或單字');
   }
 
   Future<void> deleteNote(VocabularyEntry? entry) async {

@@ -89,6 +89,7 @@ class VocabularyProvider extends ChangeNotifier {
       final random = Random();
       return allEntries[random.nextInt(allEntries.length)];
     } else {
+      await Future.delayed(const Duration(milliseconds: 100));
       throw ('找不到單字');
     }
   }

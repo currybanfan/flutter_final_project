@@ -36,14 +36,12 @@ class AuthPageState extends State<AuthPage> {
           Provider.of<SupabaseProvider>(context, listen: false);
       final response = await supabaseProvider.signIn(
           _emailController.text, _passwordController.text);
-      if (context.mounted) {
-        showTopSnackBar(context, response, SnackBarType.success);
-        Navigator.pushReplacementNamed(context, '/home');
-      }
+      if (!context.mounted) return;
+      showTopSnackBar(context, response, SnackBarType.success);
+      Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
-      if (context.mounted) {
-        showTopSnackBar(context, e.toString(), SnackBarType.failure);
-      }
+      if (!context.mounted) return;
+      showTopSnackBar(context, e.toString(), SnackBarType.failure);
     }
   }
 
@@ -63,7 +61,7 @@ class AuthPageState extends State<AuthPage> {
         title: Text('註冊和登入', style: theme.textTheme.titleLarge),
         backgroundColor: theme.colorScheme.primary,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
