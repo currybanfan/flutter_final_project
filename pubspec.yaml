@@ -41,6 +41,7 @@ dependencies:
     supabase: ^2.2.0
     flutter_secure_storage: ^9.2.2
     custom_radio_grouped_button: ^2.2.1
+    shared_preferences: ^2.2.3
 
 dev_dependencies:
     flutter_test:

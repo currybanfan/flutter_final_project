@@ -20,13 +20,11 @@ class AuthPageState extends State<AuthPage> {
           Provider.of<SupabaseProvider>(context, listen: false);
       final response = await supabaseProvider.signUp(
           _emailController.text, _passwordController.text);
-      if (context.mounted) {
-        showTopSnackBar(context, response, SnackBarType.success);
-      }
+      if (!mounted) return;
+      showTopSnackBar(context, '註冊成功', SnackBarType.success);
     } catch (e) {
-      if (context.mounted) {
-        showTopSnackBar(context, e.toString(), SnackBarType.failure);
-      }
+      print('e message: $e');
+      showTopSnackBar(context, e.toString(), SnackBarType.failure);
     }
   }
 
@@ -36,11 +34,22 @@ class AuthPageState extends State<AuthPage> {
           Provider.of<SupabaseProvider>(context, listen: false);
       final response = await supabaseProvider.signIn(
           _emailController.text, _passwordController.text);
-      if (!context.mounted) return;
-      showTopSnackBar(context, response, SnackBarType.success);
+      if (!mounted) return;
+      showTopSnackBar(context, '登入成功', SnackBarType.success);
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
-      if (!context.mounted) return;
+      showTopSnackBar(context, e.toString(), SnackBarType.failure);
+    }
+  }
+
+  Future<void> _resetPassword() async {
+    try {
+      final supabaseProvider =
+          Provider.of<SupabaseProvider>(context, listen: false);
+      await supabaseProvider.resetPassword(_emailController.text);
+      if (!mounted) return;
+      showTopSnackBar(context, '重置密碼的郵件已發送', SnackBarType.success);
+    } catch (e) {
       showTopSnackBar(context, e.toString(), SnackBarType.failure);
     }
   }
@@ -67,11 +76,11 @@ class AuthPageState extends State<AuthPage> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
             const SizedBox(height: 20),
@@ -80,18 +89,23 @@ class AuthPageState extends State<AuthPage> {
               children: [
                 ElevatedButton(
                   onPressed: _signUp,
-                  child: Text('註冊'),
+                  child: const Text('註冊'),
                 ),
                 ElevatedButton(
                   onPressed: _signIn,
-                  child: Text('登入'),
+                  child: const Text('登入'),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _guestSignIn,
-              child: Text('訪客登入'),
+              child: const Text('訪客登入'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _resetPassword,
+              child: const Text('忘記密碼'),
             ),
           ],
         ),

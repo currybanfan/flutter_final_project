@@ -20,6 +20,7 @@ class TestPageState extends State<TestPage> with TickerProviderStateMixin {
   bool _showAnimation = false;
   bool _isError = false; // 用來控制動畫顯示
   String _displayedText = '';
+  bool _isLoadingNextEntry = false;
 
   late final VocabularyProvider vocabularyProvider;
 
@@ -39,6 +40,7 @@ class TestPageState extends State<TestPage> with TickerProviderStateMixin {
   }
 
   void _onTextChanged() {
+    if (_isLoadingNextEntry) return;
     setState(() {
       _updateDisplayedText(_controller.text);
       if (_controller.text.length == _randomEntry?.letterCount) {
@@ -50,8 +52,10 @@ class TestPageState extends State<TestPage> with TickerProviderStateMixin {
         _showAnimation = false;
       }
       if (_showAnimation) {
+        _isLoadingNextEntry = true;
         Future.delayed(const Duration(seconds: 1), () {
           _loadNextEntry();
+          _isLoadingNextEntry = false;
         });
       }
     });
@@ -74,7 +78,11 @@ class TestPageState extends State<TestPage> with TickerProviderStateMixin {
     final entry = await _loadRandomEntry();
     setState(() {
       _randomEntry = entry;
+      _showAnimation = _isError = false;
       _controller.clear();
+      _onTextChanged(); // 手動調用 _onTextChanged
+
+      print('_randomEntry: ${entry?.word}');
     });
   }
 
@@ -221,6 +229,7 @@ class TestPageState extends State<TestPage> with TickerProviderStateMixin {
           '單字測驗',
           style: theme.textTheme.titleLarge,
         ),
+        iconTheme: IconThemeData(color: theme.colorScheme.onPrimary),
         backgroundColor: theme.colorScheme.primary,
       ),
       body: SingleChildScrollView(

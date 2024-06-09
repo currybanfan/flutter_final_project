@@ -28,7 +28,6 @@ class VocabularyProvider extends ChangeNotifier {
   }
 
   Future<List<VocabularyEntry>?> getVocabulary(String level) async {
-    print('level: $level');
     try {
       // if (level == '全部') {
       //   if (_vocabularyMap.length < levels.length - 1) {

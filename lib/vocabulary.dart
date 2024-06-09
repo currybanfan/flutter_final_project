@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'providers/vocabulary_provider.dart';
 import 'package:flutter/material.dart';
 import 'snack_bar.dart';
 import 'package:provider/provider.dart';
@@ -84,7 +85,10 @@ class VocabularyDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final supabase = Provider.of<SupabaseProvider>(context, listen: false);
+    final supabaseProvider =
+        Provider.of<SupabaseProvider>(context, listen: false);
+    final vocabularyProvider = Provider.of<VocabularyProvider>(context);
+
     final theme = Theme.of(context);
 
     return AlertDialog(
@@ -134,25 +138,47 @@ class VocabularyDialog extends StatelessWidget {
             ttsModel.speak(entry?.word ?? "");
           },
         ),
-        IconButton(
-          icon: const Icon(Icons.save_rounded),
-          color: theme.colorScheme.primaryContainer,
-          disabledColor: Colors.grey,
-          onPressed: supabase.isLoggedIn
-              ? () async {
-                  try {
-                    await supabase.saveNote(entry);
-                    if (context.mounted) {
-                      showTopSnackBar(context, '儲存成功', SnackBarType.success);
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      showTopSnackBar(
-                          context, e.toString(), SnackBarType.failure);
-                    }
-                  }
-                }
-              : null,
+        FutureBuilder<List<VocabularyEntry>?>(
+          future: vocabularyProvider.getVocabulary('筆記'),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else {
+              final isSaved =
+                  snapshot.data?.any((note) => note.word == entry?.word) ??
+                      false;
+              return IconButton(
+                icon: Icon(isSaved ? Icons.delete_rounded : Icons.save_rounded),
+                color: theme.colorScheme.primaryContainer,
+                disabledColor: Colors.grey,
+                onPressed: supabaseProvider.isLoggedIn
+                    ? () async {
+                        try {
+                          if (isSaved) {
+                            await supabaseProvider.deleteNote(entry);
+                            if (context.mounted) {
+                              showTopSnackBar(
+                                  context, '刪除成功', SnackBarType.success);
+                              Navigator.of(context).pop(true);
+                            }
+                          } else {
+                            await supabaseProvider.saveNote(entry);
+                            if (context.mounted) {
+                              showTopSnackBar(
+                                  context, '儲存成功', SnackBarType.success);
+                            }
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            showTopSnackBar(
+                                context, e.toString(), SnackBarType.failure);
+                          }
+                        }
+                      }
+                    : null,
+              );
+            }
+          },
         ),
       ],
     );

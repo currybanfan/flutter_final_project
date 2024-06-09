@@ -55,6 +55,8 @@ ThemeData lightTheme() {
 }
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   const supabaseKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0dHJoc3hnbnJsdGVrZmdiZnJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY5NTEyNjUsImV4cCI6MjAzMjUyNzI2NX0.bCLktGjILcCH2CQHzPqxJ5YwDdTpTBLEoF3bqD6f9Cw';
 
