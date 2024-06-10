@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'test_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math';
 import '../providers/supabase_provider.dart';
 import 'package:provider/provider.dart';
+import 'fill_in_page.dart';
+import 'multiple_choice_page.dart';
 
 class HomePage extends StatelessWidget {
   final List<String> recommendedWords = ['Flutter', 'Dart', 'TTS'];
@@ -27,32 +28,7 @@ class HomePage extends StatelessWidget {
         color: theme.colorScheme.surfaceDim,
         child: Column(
           children: [
-            // 上方推薦詞彙區域
-            QuotesWidget(),
-            // Container(
-            //   color: theme.colorScheme.surface,
-            //   padding: const EdgeInsets.all(16.0),
-            //   child: Column(
-            //     children: recommendedWords.map((word) {
-            //       return Padding(
-            //         padding: const EdgeInsets.symmetric(vertical: 4.0),
-            //         child: Container(
-            //           width: double.infinity,
-            //           decoration: BoxDecoration(
-            //             color: Colors.white,
-            //             border: Border.all(color: Colors.grey.shade300),
-            //             borderRadius: BorderRadius.circular(8.0),
-            //           ),
-            //           padding: const EdgeInsets.all(8.0),
-            //           child: Text(
-            //             word,
-            //             style: theme.textTheme.bodyMedium,
-            //           ),
-            //         ),
-            //       );
-            //     }).toList(),
-            //   ),
-            // ),
+            const QuotesWidget(),
             const SizedBox(height: 16.0),
             // 中間功能圖標區域
             Expanded(
@@ -67,10 +43,22 @@ class HomePage extends StatelessWidget {
                     _buildFeatureIcon(
                       context,
                       icon: Icons.quiz,
-                      label: '單字測試',
+                      label: '填充測驗',
                       onTap: () {
                         Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => TestPage()));
+                            MaterialPageRoute(builder: (_) => const FillIn()));
+                      },
+                    ),
+                    _buildFeatureIcon(
+                      context,
+                      icon: Icons.check_box,
+                      label: '選擇測驗',
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const MultipleChoice(),
+                            ));
                       },
                     ),
                     _buildFeatureIcon(
@@ -86,18 +74,6 @@ class HomePage extends StatelessWidget {
                         Navigator.pushReplacementNamed(context, '/');
                       },
                     ),
-                    // _buildFeatureIcon(
-                    //   context,
-                    //   icon: Icons.star,
-                    //   label: '測試 3',
-                    //   onTap: () {
-                    //     Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //             builder: (_) => TestPage(testName: '測試 3')));
-                    //   },
-                    // ),
-                    // 你可以繼續添加更多功能圖標
                   ],
                 ),
               ),

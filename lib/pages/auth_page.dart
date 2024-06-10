@@ -18,7 +18,7 @@ class AuthPageState extends State<AuthPage> {
     try {
       final supabaseProvider =
           Provider.of<SupabaseProvider>(context, listen: false);
-      final response = await supabaseProvider.signUp(
+      await supabaseProvider.signUp(
           _emailController.text, _passwordController.text);
       if (!mounted) return;
       showTopSnackBar(context, '註冊成功', SnackBarType.success);
@@ -32,7 +32,7 @@ class AuthPageState extends State<AuthPage> {
     try {
       final supabaseProvider =
           Provider.of<SupabaseProvider>(context, listen: false);
-      final response = await supabaseProvider.signIn(
+      await supabaseProvider.signIn(
           _emailController.text, _passwordController.text);
       if (!mounted) return;
       showTopSnackBar(context, '登入成功', SnackBarType.success);

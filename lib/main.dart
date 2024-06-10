@@ -6,7 +6,6 @@ import 'providers/supabase_provider.dart';
 import 'pages/auth_page.dart';
 import 'pages/notes_page.dart';
 import 'pages/home_page.dart';
-import 'pages/test_page.dart';
 
 ThemeData lightTheme() {
   return ThemeData(

@@ -100,8 +100,7 @@ class VocabularyDialog extends StatelessWidget {
       ),
       content: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight:
-              MediaQuery.of(context).size.height * 0.5, // 設置高度上限為屏幕高度的60%
+          maxHeight: MediaQuery.of(context).size.height * 0.5,
         ),
         child: SingleChildScrollView(
           child: Column(

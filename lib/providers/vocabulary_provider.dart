@@ -29,14 +29,6 @@ class VocabularyProvider extends ChangeNotifier {
 
   Future<List<VocabularyEntry>?> getVocabulary(String level) async {
     try {
-      // if (level == '全部') {
-      //   if (_vocabularyMap.length < levels.length - 1) {
-      //     await Future.wait(levels
-      //         .where((level) => level != '全部')
-      //         .map((level) => fetchVocabulary(level)));
-      //   }
-      //   return _vocabularyMap.values.expand((list) => list).toList();
-      // } else
       if (level == '筆記') {
         var notes = await _supabaseProvider.getNotes();
 
@@ -47,9 +39,7 @@ class VocabularyProvider extends ChangeNotifier {
       }
     } catch (e) {
       rethrow;
-      // print(e);
     }
-    return null;
   }
 
   Future<void> fetchVocabulary(String level) async {

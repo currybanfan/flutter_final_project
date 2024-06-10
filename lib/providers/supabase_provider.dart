@@ -35,8 +35,6 @@ class SupabaseProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final sessionJson = prefs.getString('session');
 
-    print('Stored session: $sessionJson');
-
     if (sessionJson != null) {
       try {
         final response = await _supabaseClient.auth.recoverSession(sessionJson);
@@ -90,7 +88,7 @@ class SupabaseProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('session', jsonEncode(response.session!.toJson()));
     } catch (error) {
-      throw error;
+      rethrow;
     }
   }
 
