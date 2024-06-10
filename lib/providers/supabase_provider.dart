@@ -54,6 +54,8 @@ class SupabaseProvider extends ChangeNotifier {
     final response =
         await _supabaseClient.auth.signUp(email: email, password: password);
 
+    print('response: $response');
+
     if (response.session == null) {
       throw ('註冊失敗');
     }
@@ -74,6 +76,9 @@ class SupabaseProvider extends ChangeNotifier {
       final response = await _supabaseClient.auth
           .signInWithPassword(email: email, password: password);
 
+      print('response: $response');
+
+      print('response: $response');
       if (response.user == null) {
         throw ('找不到使用者');
       }
@@ -114,14 +119,6 @@ class SupabaseProvider extends ChangeNotifier {
     if (_expiryDate != null) {
       final timeToExpiry = _expiryDate!.difference(DateTime.now()).inSeconds;
       _authTimer = Timer(Duration(seconds: timeToExpiry), signOut);
-    }
-  }
-
-  Future<void> resetPassword(String email) async {
-    try {
-      await _supabaseClient.auth.resetPasswordForEmail(email);
-    } catch (error) {
-      throw ('無法重置密碼');
     }
   }
 
