@@ -51,24 +51,28 @@ class SupabaseProvider extends ChangeNotifier {
   }
 
   Future<void> signUp(String email, String password) async {
-    final response =
-        await _supabaseClient.auth.signUp(email: email, password: password);
-
-    print('response: $response');
-
-    if (response.session == null) {
-      throw ('註冊失敗');
+    try {
+      final response =
+          await _supabaseClient.auth.signUp(email: email, password: password);
+      print('response: $response');
+    } catch (error) {
+      print('error: ${error.toString()}');
+      rethrow;
     }
 
-    _currentUser = response.user;
-    _expiryDate =
-        DateTime.now().add(Duration(seconds: response.session!.expiresIn!));
+    // if (response.session == null) {
+    //   throw ('註冊失敗');
+    // }
 
-    _autoLogout();
-    notifyListeners();
+    // _currentUser = response.user;
+    // _expiryDate =
+    //     DateTime.now().add(Duration(seconds: response.session!.expiresIn!));
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('session', jsonEncode(response.session!.toJson()));
+    // _autoLogout();
+    // notifyListeners();
+
+    // final prefs = await SharedPreferences.getInstance();
+    // await prefs.setString('session', jsonEncode(response.session!.toJson()));
   }
 
   Future<void> signIn(String email, String password) async {
