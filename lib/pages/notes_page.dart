@@ -122,7 +122,7 @@ class NotesPageState extends State<NotesPage> {
                   return ListTile(
                     title: Text(
                       note.vocabularyEntry.word,
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodyLarge,
                     ),
                     subtitle: Text(
                       note.vocabularyEntry.definitions
