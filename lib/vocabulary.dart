@@ -134,6 +134,7 @@ class VocabularyDialog extends StatelessWidget {
           color: theme.colorScheme.primaryContainer,
           onPressed: () {
             var ttsModel = TtsModel();
+            print("test tts model");
             ttsModel.speak(entry?.word ?? "");
           },
         ),
@@ -165,6 +166,7 @@ class VocabularyDialog extends StatelessWidget {
                             if (context.mounted) {
                               showTopSnackBar(
                                   context, '儲存成功', SnackBarType.success);
+                              Navigator.of(context).pop(true);
                             }
                           }
                         } catch (e) {
