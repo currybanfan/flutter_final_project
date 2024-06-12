@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../vocabulary_dialog.dart';
 
+// VocabularyPage 類，用於顯示單字頁面
 class VocabularyPage extends StatefulWidget {
   const VocabularyPage({super.key});
 
@@ -12,20 +13,23 @@ class VocabularyPage extends StatefulWidget {
   VocabularyPageState createState() => VocabularyPageState();
 }
 
+// VocabularyPageState 類，用於管理單字頁面的狀態
 class VocabularyPageState extends State<VocabularyPage> {
-  int currentIndex = 0;
-  List<String> levels = [];
-  late final VocabularyProvider provider;
-  String searchQuery = '';
-  final FocusNode _focusNode = FocusNode();
+  int currentIndex = 0; // 當前選中的索引
+  List<String> levels = []; // 存儲所有級別
+  late final VocabularyProvider provider; // VocabularyProvider 的實例
+  String searchQuery = ''; // 搜尋的查詢字串
+  final FocusNode _focusNode = FocusNode(); // 焦點控制器
 
   @override
   void initState() {
     super.initState();
+    // 獲取 VocabularyProvider 的實例並初始化級別列表
     provider = Provider.of<VocabularyProvider>(context, listen: false);
     levels = provider.getLevels().where((level) => level != '筆記').toList();
-    provider.fetchVocabulary(levels[currentIndex]);
+    provider.fetchVocabulary(levels[currentIndex]); // 初始加載當前級別的單字
 
+    // 添加焦點變化監聽器
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
         setState(() {});
@@ -39,6 +43,7 @@ class VocabularyPageState extends State<VocabularyPage> {
     super.dispose();
   }
 
+  // 更新搜尋查詢的方法
   void updateSearchQuery(String query) {
     setState(() {
       searchQuery = query;
@@ -63,6 +68,7 @@ class VocabularyPageState extends State<VocabularyPage> {
                   style: theme.textTheme.titleLarge,
                 ),
               ),
+              // 搜尋框
               SizedBox(
                 width: 250,
                 child: TextField(
@@ -98,6 +104,7 @@ class VocabularyPageState extends State<VocabularyPage> {
             child: Column(
               children: [
                 const SizedBox(height: 10),
+                // 顯示級別的 TabBar
                 ButtonsTabBar(
                   height: 50.0,
                   backgroundColor: theme.colorScheme.primary,
@@ -126,6 +133,7 @@ class VocabularyPageState extends State<VocabularyPage> {
                   },
                 ),
                 const SizedBox(height: 5),
+                // 顯示單字列表的 TabBarView
                 Expanded(
                   child: TabBarView(
                     children: levels.map((level) {
@@ -146,6 +154,7 @@ class VocabularyPageState extends State<VocabularyPage> {
   }
 }
 
+// VocabularyListView 類，用於顯示單字列表
 class VocabularyListView extends StatelessWidget {
   const VocabularyListView({
     required this.level,
@@ -154,9 +163,9 @@ class VocabularyListView extends StatelessWidget {
     super.key,
   });
 
-  final String level;
-  final bool isVisible;
-  final String searchQuery;
+  final String level; // 級別
+  final bool isVisible; // 是否可見
+  final String searchQuery; // 搜尋查詢字串
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +175,7 @@ class VocabularyListView extends StatelessWidget {
     return Visibility(
       visible: isVisible,
       child: FutureBuilder<List<VocabularyEntry>?>(
-        future: provider.getVocabulary(level),
+        future: provider.getVocabulary(level), // 獲取單字
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -185,6 +194,7 @@ class VocabularyListView extends StatelessWidget {
           } else {
             var vocabularyList = snapshot.data ?? [];
 
+            // 根據搜尋查詢過濾單字
             if (searchQuery.isNotEmpty) {
               vocabularyList = vocabularyList
                   .where((entry) =>
@@ -194,6 +204,7 @@ class VocabularyListView extends StatelessWidget {
                   .toList();
             }
 
+            // 顯示單字列表
             return ListView.separated(
               itemCount: vocabularyList.length,
               separatorBuilder: (context, index) => const Divider(),

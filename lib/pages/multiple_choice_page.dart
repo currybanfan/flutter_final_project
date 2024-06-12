@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../vocabulary.dart';
 import 'package:custom_radio_grouped_button/custom_radio_grouped_button.dart';
 
+// MultipleChoice 類，用於顯示選擇題頁面
 class MultipleChoice extends StatefulWidget {
   const MultipleChoice({super.key});
 
@@ -13,18 +14,23 @@ class MultipleChoice extends StatefulWidget {
   MultipleChoiceState createState() => MultipleChoiceState();
 }
 
+// MultipleChoiceState 類，用於管理選擇題頁面的狀態
 class MultipleChoiceState extends State<MultipleChoice> {
+  // 用來存儲選擇的級別
   List<String> _selectedLevels = [];
+  // 存儲所有級別
   late final List<String> levels;
 
   @override
   void initState() {
     super.initState();
+    // 獲取 VocabularyProvider 的實例並初始化級別列表
     final vocabularyProvider =
         Provider.of<VocabularyProvider>(context, listen: false);
     levels = vocabularyProvider.getLevels().toList();
   }
 
+  // 開始測驗，將選擇的級別傳遞到測驗頁面
   void _startTest() {
     Navigator.push(
       context,
@@ -51,9 +57,11 @@ class MultipleChoiceState extends State<MultipleChoice> {
       ),
       body: Consumer<SupabaseProvider>(
         builder: (context, supabaseProvider, child) {
+          // 根據登錄狀態禁用相應的級別
           final disabledLevels = supabaseProvider.isLoggedIn ? [] : ['筆記'];
           return Column(
             children: [
+              // 顯示級別選擇的自定義單選按鈕組
               SizedBox(
                 height: 200,
                 child: CustomCheckBoxGroup(
@@ -85,6 +93,7 @@ class MultipleChoiceState extends State<MultipleChoice> {
                 ),
               ),
               const SizedBox(height: 10),
+              // 開始測驗按鈕
               ElevatedButton(
                 onPressed: _selectedLevels.isEmpty ? null : _startTest,
                 child: const Text('開始測驗'),
@@ -97,6 +106,7 @@ class MultipleChoiceState extends State<MultipleChoice> {
   }
 }
 
+// 測驗頁面類
 class _QuizPage extends StatefulWidget {
   final List<String> selectedLevels;
 
@@ -106,25 +116,37 @@ class _QuizPage extends StatefulWidget {
   _QuizPageState createState() => _QuizPageState();
 }
 
+// 測驗頁面狀態類
 class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
+  // 隨機詞彙條目
   VocabularyEntry? _randomEntry;
+  // 所有級別
   late final List<String> levels;
+  // 用戶選擇的答案
   String? _selectedAnswer;
+  // 控制是否加載下一個條目
   bool _isLoadingNextEntry = false;
+  // 選項列表
   List<String> _choices = [];
+  // 初始化加載
   late Future<void> _initialLoad;
 
+  // VocabularyProvider 的實例
   late final VocabularyProvider vocabularyProvider;
 
   @override
   void initState() {
     super.initState();
+    // 獲取 VocabularyProvider 的實例
     vocabularyProvider =
         Provider.of<VocabularyProvider>(context, listen: false);
+    // 初始化選擇的級別
     levels = widget.selectedLevels;
+    // 初始化加載第一個問題
     _initialLoad = _nextQuestion();
   }
 
+  // 檢查用戶選擇的答案是否正確
   void _checkAnswer() {
     if (_selectedAnswer == null || _isLoadingNextEntry) return;
     setState(() {
@@ -136,6 +158,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
     });
   }
 
+  // 加載下一個問題
   Future<void> _nextQuestion() async {
     final entries = await _loadRandomEntries();
     final randomIndex = Random().nextInt(entries.length);
@@ -149,6 +172,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
     });
   }
 
+  // 從指定級別中加載隨機詞彙條目
   Future<List<VocabularyEntry>> _loadRandomEntries() async {
     final entries = <VocabularyEntry>[];
 
@@ -179,14 +203,17 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
         future: _initialLoad,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
+            // 如果數據仍在加載，顯示進度指示器
             return const Center(
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasError) {
+            // 如果出現錯誤，顯示錯誤信息
             return Center(
               child: Text('發生錯誤: ${snapshot.error}'),
             );
           } else {
+            // 顯示選擇題頁面
             return SingleChildScrollView(
               child: Column(
                 children: [
@@ -199,6 +226,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                       children: _randomEntry?.definitions.map((definition) {
                             return Column(
                               children: [
+                                // 顯示詞彙的定義
                                 Center(
                                   child: Text(
                                     definition.text,
@@ -206,6 +234,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 const SizedBox(height: 5.0),
+                                // 顯示詞性
                                 Center(
                                   child: Text(
                                     definition.partOfSpeech,
@@ -220,6 +249,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  // 顯示選項
                   ..._choices.map((choice) => GestureDetector(
                         onTap: () {
                           setState(() {
@@ -258,6 +288,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                               vertical: 5.0, horizontal: 15.0),
                           child: Row(
                             children: [
+                              // 選項單選按鈕
                               Radio<String>(
                                 value: choice,
                                 groupValue: _selectedAnswer,
@@ -278,9 +309,11 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                         ),
                       )),
                   const SizedBox(height: 10),
+                  // 顯示答案和確認按鈕
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      // 顯示答案按鈕
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
@@ -289,6 +322,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                         },
                         child: const Text('顯示答案'),
                       ),
+                      // 確認按鈕
                       ElevatedButton(
                         onPressed:
                             _selectedAnswer == null ? null : _checkAnswer,
@@ -296,11 +330,6 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  // ElevatedButton(
-                  //   onPressed: _nextQuestion,
-                  //   child: const Text('下一題'),
-                  // ),
                 ],
               ),
             );

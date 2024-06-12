@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../vocabulary.dart';
 import 'package:custom_radio_grouped_button/custom_radio_grouped_button.dart';
 
+// 填空題頁面
 class FillIn extends StatefulWidget {
   const FillIn({super.key});
 
@@ -13,17 +14,21 @@ class FillIn extends StatefulWidget {
 }
 
 class FillInState extends State<FillIn> {
+  // 用來存儲選擇的級別
   List<String> _selectedLevels = [];
+  // 存儲所有級別
   late final List<String> levels;
 
   @override
   void initState() {
     super.initState();
+    // 獲取 VocabularyProvider 的實例並初始化級別列表
     final vocabularyProvider =
         Provider.of<VocabularyProvider>(context, listen: false);
     levels = vocabularyProvider.getLevels().toList();
   }
 
+  // 開始測驗，將選擇的級別傳遞到測驗頁面
   void _startTest() {
     Navigator.push(
       context,
@@ -50,9 +55,11 @@ class FillInState extends State<FillIn> {
       ),
       body: Consumer<SupabaseProvider>(
         builder: (context, supabaseProvider, child) {
+          // 根據登錄狀態禁用相應的級別
           final disabledLevels = supabaseProvider.isLoggedIn ? [] : ['筆記'];
           return Column(
             children: [
+              // 顯示級別選擇的自定義單選按鈕組
               SizedBox(
                 height: 200,
                 child: CustomCheckBoxGroup(
@@ -84,6 +91,7 @@ class FillInState extends State<FillIn> {
                 ),
               ),
               const SizedBox(height: 10),
+              // 開始測驗按鈕
               ElevatedButton(
                 onPressed: _selectedLevels.isEmpty ? null : _startTest,
                 child: const Text('開始測驗'),
@@ -96,6 +104,7 @@ class FillInState extends State<FillIn> {
   }
 }
 
+// 測驗頁面
 class _QuizPage extends StatefulWidget {
   final List<String> selectedLevels;
 
@@ -106,24 +115,37 @@ class _QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
+  // 隨機詞彙條目
   VocabularyEntry? _randomEntry;
+  // 所有級別
   late final List<String> levels;
+  // 文本輸入控制器
   final TextEditingController _controller = TextEditingController();
+  // 控制動畫顯示的標誌
   bool _showAnimation = false;
-  bool _isError = false; // 用來控制動畫顯示
+  // 判斷是否輸入錯誤
+  bool _isError = false;
+  // 顯示的文本
   String _displayedText = '';
+  // 控制是否加載下一個條目
   bool _isLoadingNextEntry = false;
+  // 初始化加載
   late Future<void> _initialLoad;
 
+  // VocabularyProvider 的實例
   late final VocabularyProvider vocabularyProvider;
 
   @override
   void initState() {
     super.initState();
+    // 獲取 VocabularyProvider 的實例
     vocabularyProvider =
         Provider.of<VocabularyProvider>(context, listen: false);
+    // 初始化選擇的級別
     levels = widget.selectedLevels;
+    // 添加文本變化監聽器
     _controller.addListener(_onTextChanged);
+    // 初始化加載第一個問題
     _initialLoad = _nextQuestion();
   }
 
@@ -133,11 +155,13 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // 監聽文本變化的方法
   void _onTextChanged() {
     if (_isLoadingNextEntry) return;
     setState(() {
       _updateDisplayedText(_controller.text);
       if (_controller.text.length == _randomEntry?.letterCount) {
+        // 判斷輸入是否正確
         var isCorrect = _controller.text == _randomEntry?.word;
         _showAnimation = isCorrect;
         _isError = !isCorrect;
@@ -146,6 +170,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
         _showAnimation = false;
       }
       if (_showAnimation) {
+        // 如果正確，延遲一秒鐘加載下一個問題
         _isLoadingNextEntry = true;
         Future.delayed(const Duration(seconds: 1), () {
           _nextQuestion();
@@ -155,7 +180,9 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
     });
   }
 
+  // 更新顯示的文本
   void _updateDisplayedText(String text) {
+    // 用已輸入的文字加上 _ 表示剩餘字數
     int inputLetterCount = text.length;
     int remainingBottomLine =
         (_randomEntry?.letterCount ?? 0) - inputLetterCount;
@@ -168,16 +195,18 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
     _displayedText = text + blankField;
   }
 
+  // 加載下一個問題
   Future<void> _nextQuestion() async {
     final entry = await _loadRandomEntry();
     setState(() {
       _randomEntry = entry;
       _showAnimation = _isError = false;
       _controller.clear();
-      _onTextChanged(); // 手動調用 _onTextChanged
+      _onTextChanged(); // 手動調用 _onTextChanged 更新顯示
     });
   }
 
+  // 從指定級別中加載隨機詞彙條目
   Future<VocabularyEntry?> _loadRandomEntry() async {
     return await vocabularyProvider.loadRandomEntry(levels);
   }
@@ -199,14 +228,17 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
         future: _initialLoad,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
+            // 如果數據仍在加載，顯示進度指示器
             return const Center(
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasError) {
+            // 如果出現錯誤，顯示錯誤信息
             return Center(
               child: Text('發生錯誤: ${snapshot.error}'),
             );
           } else {
+            // 顯示填充題頁面
             return SingleChildScrollView(
               child: Column(
                 children: [
@@ -219,6 +251,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                       children: _randomEntry?.definitions.map((definition) {
                             return Column(
                               children: [
+                                // 顯示詞彙的定義
                                 Center(
                                   child: Text(
                                     definition.text,
@@ -226,6 +259,7 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 const SizedBox(height: 5.0),
+                                // 顯示詞性
                                 Center(
                                   child: Text(
                                     definition.partOfSpeech,
@@ -240,11 +274,13 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  // 顯示填空的區域
                   SizedBox(
                     height: 100,
                     child: Stack(
                       alignment: Alignment.bottomCenter,
                       children: [
+                        // 動畫文本顯示
                         AnimatedDefaultTextStyle(
                           duration: const Duration(milliseconds: 100),
                           style: theme.textTheme.bodyLarge!.copyWith(
@@ -275,12 +311,14 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  // 顯示答案和下一題按鈕
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
+                            // 顯示答案
                             _controller.text = _randomEntry!.word;
                           });
                         },

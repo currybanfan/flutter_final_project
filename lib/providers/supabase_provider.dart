@@ -6,13 +6,20 @@ import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
 import '../vocabulary.dart';
 
+// SupabaseProvider 類，管理用戶身份驗證和數據庫操作
 class SupabaseProvider extends ChangeNotifier {
+  // Supabase 客戶端
   final SupabaseClient _supabaseClient;
+  // 當前用戶
   User? _currentUser;
+  // session 過期時間
   DateTime? _expiryDate;
+  // 計時器，用於自動登出
   Timer? _authTimer;
+  // 是否為訪客
   bool _isGuest = false; // 新增的變數
 
+  // 構造函數，初始化 Supabase 客戶端並自動登入
   SupabaseProvider(String url, String key)
       : _supabaseClient = SupabaseClient(
           url,
@@ -23,27 +30,34 @@ class SupabaseProvider extends ChangeNotifier {
         ) {
     _autoSignIn();
     _supabaseClient.auth.onAuthStateChange.listen((data) {
+      // 監聽身份驗證狀態變化
       _currentUser = data.session?.user;
       notifyListeners();
     });
   }
 
+  // 獲取 Supabase 客戶端
   SupabaseClient get client => _supabaseClient;
 
+  // 判斷用戶是否已登入
   bool get isLoggedIn => _currentUser != null;
+  // 判斷是否為訪客
   bool get isGuest => _isGuest;
 
+  // 訪客登入方法
   void guestSignIn() {
     _isGuest = true;
     notifyListeners();
   }
 
+  // 自動登入方法，從本地存儲恢復 session
   Future<void> _autoSignIn() async {
     final prefs = await SharedPreferences.getInstance();
     final sessionJson = prefs.getString('session');
 
     if (sessionJson != null) {
       try {
+        // 使用 session JSON 恢復用戶
         final response = await _supabaseClient.auth.recoverSession(sessionJson);
         _currentUser = response.user;
         _expiryDate =
@@ -56,6 +70,7 @@ class SupabaseProvider extends ChangeNotifier {
     }
   }
 
+  // 用戶註冊方法
   Future<void> signUp(String email, String password) async {
     try {
       await _supabaseClient.auth.signUp(email: email, password: password);
@@ -65,6 +80,7 @@ class SupabaseProvider extends ChangeNotifier {
     }
   }
 
+  // 用戶登入方法
   Future<void> signIn(String email, String password) async {
     try {
       final response = await _supabaseClient.auth
@@ -81,6 +97,7 @@ class SupabaseProvider extends ChangeNotifier {
       _autoLogout();
       notifyListeners();
 
+      // 將 session 保存到本地存儲
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('session', jsonEncode(response.session!.toJson()));
     } catch (error) {
@@ -88,6 +105,7 @@ class SupabaseProvider extends ChangeNotifier {
     }
   }
 
+  // 用戶登出方法
   Future<void> signOut() async {
     await _supabaseClient.auth.signOut();
     _currentUser = null;
@@ -99,11 +117,13 @@ class SupabaseProvider extends ChangeNotifier {
       _authTimer = null;
     }
 
+    // 清除本地存儲的 session
     final prefs = await SharedPreferences.getInstance();
     prefs.remove('session');
     notifyListeners();
   }
 
+  // 自動登出方法
   void _autoLogout() {
     if (_authTimer != null) {
       _authTimer!.cancel();
@@ -114,11 +134,13 @@ class SupabaseProvider extends ChangeNotifier {
     }
   }
 
+  // 保存筆記方法
   Future<void> saveNote(VocabularyEntry? entry) async {
     final userId = _currentUser?.id;
 
     if (userId != null && entry != null) {
       try {
+        // 將定義列表轉換為 JSON 字符串
         final definitionsJson =
             jsonEncode(entry.definitions.map((e) => e.toJson()).toList());
 
@@ -146,6 +168,7 @@ class SupabaseProvider extends ChangeNotifier {
     }
   }
 
+  // 刪除筆記方法
   Future<void> deleteNote(VocabularyEntry? entry) async {
     final userId = _currentUser?.id;
 
@@ -167,6 +190,7 @@ class SupabaseProvider extends ChangeNotifier {
     }
   }
 
+  // 獲取筆記列表方法
   Future<List<Note>> getNotes() async {
     final userId = _currentUser?.id;
 
@@ -176,6 +200,7 @@ class SupabaseProvider extends ChangeNotifier {
     }
 
     try {
+      // 從數據庫中查詢用戶的筆記
       final response =
           await _supabaseClient.from('notes').select().eq('user_id', userId);
 
@@ -193,21 +218,26 @@ class SupabaseProvider extends ChangeNotifier {
   }
 }
 
+// 定義 SecureStorage 類，用於安全存儲數據
 class SecureStorage implements GotrueAsyncStorage {
+  // 使用 FlutterSecureStorage 來安全存儲數據
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   @override
   Future<void> removeItem({required String key}) async {
+    // 刪除指定 key 的數據
     await _secureStorage.delete(key: key);
   }
 
   @override
   Future<void> setItem({required String key, required String value}) async {
+    // 存儲 key-value 數據
     await _secureStorage.write(key: key, value: value);
   }
 
   @override
   Future<String?> getItem({required String key}) async {
+    // 獲取指定 key 的數據
     return await _secureStorage.read(key: key);
   }
 }
