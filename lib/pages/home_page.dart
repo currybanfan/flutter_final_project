@@ -66,12 +66,8 @@ class HomePage extends StatelessWidget {
                       icon: Icons.logout_rounded,
                       label: '重新登入',
                       onTap: () {
-                        final provider = Provider.of<SupabaseProvider>(context,
-                            listen: false);
-                        if (provider.isLoggedIn) {
-                          provider.signOut();
-                        }
-                        Navigator.pushReplacementNamed(context, '/');
+                        Provider.of<SupabaseProvider>(context, listen: false)
+                            .signOut();
                       },
                     ),
                   ],

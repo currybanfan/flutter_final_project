@@ -21,14 +21,9 @@ class AuthPageState extends State<AuthPage> {
           Provider.of<SupabaseProvider>(context, listen: false);
       await supabaseProvider.signIn(
           _emailController.text, _passwordController.text);
-      if (!mounted) return;
-      showTopSnackBar(context, '登入成功', SnackBarType.success);
-      Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       final String msg;
       if (e is AuthException) {
-        print('error: ${e.toString()}');
-
         switch (e.statusCode) {
           case '400':
             msg = '帳號或密碼錯誤';
@@ -38,15 +33,15 @@ class AuthPageState extends State<AuthPage> {
       } else {
         msg = e.toString();
       }
+      if (!mounted) return;
       showTopSnackBar(context, msg, SnackBarType.failure);
     }
   }
 
   void _guestSignIn() {
-    if (context.mounted) {
-      showTopSnackBar(context, '成功以訪客身份登入', SnackBarType.success);
-      Navigator.pushReplacementNamed(context, '/home');
-    }
+    final supabaseProvider =
+        Provider.of<SupabaseProvider>(context, listen: false);
+    supabaseProvider.guestSignIn();
   }
 
   void _showSignUpDialog() {
@@ -134,7 +129,6 @@ class SignUpDialogState extends State<SignUpDialog> {
     } catch (e) {
       final String msg;
       if (e is AuthException) {
-        print('error: ${e.toString()}');
         switch (e.statusCode) {
           case '400':
             msg = '輸入資訊錯誤';

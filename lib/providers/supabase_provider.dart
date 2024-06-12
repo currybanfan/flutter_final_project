@@ -11,6 +11,7 @@ class SupabaseProvider extends ChangeNotifier {
   User? _currentUser;
   DateTime? _expiryDate;
   Timer? _authTimer;
+  bool _isGuest = false; // 新增的變數
 
   SupabaseProvider(String url, String key)
       : _supabaseClient = SupabaseClient(
@@ -30,6 +31,12 @@ class SupabaseProvider extends ChangeNotifier {
   SupabaseClient get client => _supabaseClient;
 
   bool get isLoggedIn => _currentUser != null;
+  bool get isGuest => _isGuest;
+
+  void guestSignIn() {
+    _isGuest = true;
+    notifyListeners();
+  }
 
   Future<void> _autoSignIn() async {
     final prefs = await SharedPreferences.getInstance();
@@ -43,36 +50,19 @@ class SupabaseProvider extends ChangeNotifier {
             DateTime.now().add(Duration(seconds: response.session!.expiresIn!));
         _autoLogout();
         notifyListeners();
-        print('自動登入成功');
       } catch (error) {
-        print('自動登入失敗: $error');
+        rethrow;
       }
     }
   }
 
   Future<void> signUp(String email, String password) async {
     try {
-      final response =
-          await _supabaseClient.auth.signUp(email: email, password: password);
-      print('response: $response');
+      await _supabaseClient.auth.signUp(email: email, password: password);
     } catch (error) {
       print('error: ${error.toString()}');
       rethrow;
     }
-
-    // if (response.session == null) {
-    //   throw ('註冊失敗');
-    // }
-
-    // _currentUser = response.user;
-    // _expiryDate =
-    //     DateTime.now().add(Duration(seconds: response.session!.expiresIn!));
-
-    // _autoLogout();
-    // notifyListeners();
-
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.setString('session', jsonEncode(response.session!.toJson()));
   }
 
   Future<void> signIn(String email, String password) async {
@@ -80,9 +70,6 @@ class SupabaseProvider extends ChangeNotifier {
       final response = await _supabaseClient.auth
           .signInWithPassword(email: email, password: password);
 
-      print('response: $response');
-
-      print('response: $response');
       if (response.user == null) {
         throw ('找不到使用者');
       }
@@ -105,6 +92,7 @@ class SupabaseProvider extends ChangeNotifier {
     await _supabaseClient.auth.signOut();
     _currentUser = null;
     _expiryDate = null;
+    _isGuest = false;
 
     if (_authTimer != null) {
       _authTimer!.cancel();
@@ -134,14 +122,12 @@ class SupabaseProvider extends ChangeNotifier {
         final definitionsJson =
             jsonEncode(entry.definitions.map((e) => e.toJson()).toList());
 
-        final response = await _supabaseClient.from('notes').insert({
+        await _supabaseClient.from('notes').insert({
           'user_id': userId,
           'word': entry.word,
           'definitions': definitionsJson,
           'letter_count': entry.letterCount,
         });
-
-        print(response);
       } catch (error) {
         print(error);
 
@@ -165,13 +151,11 @@ class SupabaseProvider extends ChangeNotifier {
 
     if (userId != null && entry != null) {
       try {
-        final response = await _supabaseClient
+        await _supabaseClient
             .from('notes')
             .delete()
             .eq('user_id', userId)
             .eq('word', entry.word);
-
-        print(response);
       } catch (error) {
         if (error is PostgrestException) {
           throw ('刪除失敗');
@@ -210,7 +194,7 @@ class SupabaseProvider extends ChangeNotifier {
 }
 
 class SecureStorage implements GotrueAsyncStorage {
-  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   @override
   Future<void> removeItem({required String key}) async {

@@ -6,6 +6,7 @@ import 'providers/supabase_provider.dart';
 import 'pages/auth_page.dart';
 import 'pages/notes_page.dart';
 import 'pages/home_page.dart';
+import '../snack_bar.dart';
 
 ThemeData lightTheme() {
   return ThemeData(
@@ -80,22 +81,27 @@ class VocabularyAPP extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final supabaseProvider = Provider.of<SupabaseProvider>(context);
-
     return MaterialApp(
       theme: lightTheme(),
-      initialRoute: '/',
-      routes: {
-        '/': (context) =>
-            supabaseProvider.isLoggedIn ? const MainPage() : const AuthPage(),
-        '/home': (context) => const MainPage(),
-      },
+      home: Consumer<SupabaseProvider>(
+        builder: (context, supabaseProvider, child) {
+          if (supabaseProvider.isLoggedIn) {
+            return const MainPage(signInMessage: '登入成功');
+          } else if (supabaseProvider.isGuest) {
+            return const MainPage(signInMessage: '成功以訪客身份登入');
+          } else {
+            return const AuthPage();
+          }
+        },
+      ),
     );
   }
 }
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final String? signInMessage;
+
+  const MainPage({super.key, this.signInMessage});
 
   @override
   MainPageState createState() => MainPageState();
@@ -107,9 +113,19 @@ class MainPageState extends State<MainPage> {
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   final List<Widget> _widgetOptions = [
     HomePage(),
-    VocabularyPage(),
-    NotesPage(),
+    const VocabularyPage(),
+    const NotesPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.signInMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showTopSnackBar(context, widget.signInMessage!, SnackBarType.success);
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {

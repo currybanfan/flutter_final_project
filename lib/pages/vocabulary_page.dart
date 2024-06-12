@@ -3,6 +3,7 @@ import '../vocabulary.dart';
 import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:provider/provider.dart';
 import '../providers/vocabulary_provider.dart';
+import '../vocabulary_dialog.dart';
 
 class VocabularyPage extends StatefulWidget {
   const VocabularyPage({super.key});

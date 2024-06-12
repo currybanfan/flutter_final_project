@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/supabase_provider.dart';
 import '../vocabulary.dart';
+import '../vocabulary_dialog.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
