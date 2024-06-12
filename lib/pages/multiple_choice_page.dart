@@ -250,42 +250,61 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 10),
                   // 顯示選項
+// 使用 _choices 列表生成選項的 Widget
                   ..._choices.map((choice) => GestureDetector(
+                        // GestureDetector 用於偵測點擊事件
                         onTap: () {
+                          // 當選項被點擊時，更新 _selectedAnswer 的值並觸發重建
                           setState(() {
                             _selectedAnswer = choice;
                           });
                         },
+                        // AnimatedContainer 用於創建帶有動畫效果的容器
                         child: AnimatedContainer(
+                          // 動畫持續時間為 300 毫秒
                           duration: const Duration(milliseconds: 300),
+                          // 設置容器的裝飾
                           decoration: BoxDecoration(
+                            // 設置邊框顏色
                             border: Border.all(
+                              // 如果正在加載下一個問題，根據答案是否正確設置顏色
                               color: _isLoadingNextEntry
                                   ? (choice == _randomEntry?.word
-                                      ? Colors.green
+                                      ? Colors.green // 答對了顯示綠色
                                       : (_selectedAnswer == choice
-                                          ? theme.colorScheme.error
-                                          : theme.colorScheme.onSurface))
+                                          ? theme
+                                              .colorScheme.error // 選擇錯誤答案顯示紅色
+                                          : theme.colorScheme
+                                              .onSurface)) // 其他選項顯示默認顏色
                                   : (_selectedAnswer == choice
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.onSurface),
+                                      ? theme.colorScheme.primary // 當前選擇顯示主要顏色
+                                      : theme
+                                          .colorScheme.onSurface), // 其他選項顯示默認顏色
                             ),
+                            // 設置圓角
                             borderRadius: BorderRadius.circular(8.0),
+                            // 設置背景顏色
                             color: _isLoadingNextEntry
                                 ? (choice == _randomEntry?.word
-                                    ? Colors.green.withOpacity(0.3)
+                                    ? Colors.green
+                                        .withOpacity(0.3) // 答對了顯示半透明綠色
                                     : (_selectedAnswer == choice
                                         ? theme.colorScheme.error
-                                            .withOpacity(0.3)
-                                        : theme.colorScheme.surface))
+                                            .withOpacity(0.3) // 錯誤選擇顯示半透明紅色
+                                        : theme
+                                            .colorScheme.surface)) // 其他選項顯示默認顏色
                                 : (_selectedAnswer == choice
-                                    ? theme.colorScheme.primary.withOpacity(0.1)
-                                    : theme.colorScheme.surface),
+                                    ? theme.colorScheme.primary
+                                        .withOpacity(0.1) // 當前選擇顯示半透明主要顏色
+                                    : theme.colorScheme.surface), // 其他選項顯示默認顏色
                           ),
+                          // 設置內邊距
                           padding: const EdgeInsets.symmetric(
                               vertical: 10.0, horizontal: 10.0),
+                          // 設置外邊距
                           margin: const EdgeInsets.symmetric(
                               vertical: 5.0, horizontal: 15.0),
+                          // 使用 Row 佈局內部內容
                           child: Row(
                             children: [
                               // 選項單選按鈕
@@ -293,11 +312,13 @@ class _QuizPageState extends State<_QuizPage> with TickerProviderStateMixin {
                                 value: choice,
                                 groupValue: _selectedAnswer,
                                 onChanged: (value) {
+                                  // 當單選按鈕狀態改變時，更新 _selectedAnswer 的值並觸發重建
                                   setState(() {
                                     _selectedAnswer = value;
                                   });
                                 },
                               ),
+                              // Expanded 用於佔據剩餘空間顯示選項文本
                               Expanded(
                                 child: Text(
                                   choice,

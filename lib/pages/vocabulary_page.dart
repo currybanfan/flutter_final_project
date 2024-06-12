@@ -27,7 +27,7 @@ class VocabularyPageState extends State<VocabularyPage> {
     // 獲取 VocabularyProvider 的實例並初始化級別列表
     provider = Provider.of<VocabularyProvider>(context, listen: false);
     levels = provider.getLevels().where((level) => level != '筆記').toList();
-    provider.fetchVocabulary(levels[currentIndex]); // 初始加載當前級別的單字
+    // provider.fetchVocabulary(levels[currentIndex]); // 初始加載當前級別的單字
 
     // 添加焦點變化監聽器
     _focusNode.addListener(() {

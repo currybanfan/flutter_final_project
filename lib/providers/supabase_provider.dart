@@ -52,16 +52,21 @@ class SupabaseProvider extends ChangeNotifier {
 
   // 自動登入方法，從本地存儲恢復 session
   Future<void> _autoSignIn() async {
+    // 從本地存儲中讀取之前保存的 session JSON 字符串
     final prefs = await SharedPreferences.getInstance();
+    // 使用 Supabase 提供的 recoverSession 方法恢復用戶的會話
     final sessionJson = prefs.getString('session');
 
     if (sessionJson != null) {
       try {
         // 使用 session JSON 恢復用戶
         final response = await _supabaseClient.auth.recoverSession(sessionJson);
+        // 如果恢復會話成功，將恢復的用戶設置為當前用戶
         _currentUser = response.user;
+        // 設置會話的過期時間
         _expiryDate =
             DateTime.now().add(Duration(seconds: response.session!.expiresIn!));
+        // 確保會話過期時自動登出
         _autoLogout();
         notifyListeners();
       } catch (error) {

@@ -151,7 +151,7 @@ class QuotesWidgetState extends State<QuotesWidget> {
           // 如果出現錯誤，顯示錯誤信息
           return Center(
               child: Text(
-            '${snapshot.error}',
+            '出現未知錯誤',
             style: theme.textTheme.bodyLarge,
           ));
         } else if (!snapshot.hasData) {

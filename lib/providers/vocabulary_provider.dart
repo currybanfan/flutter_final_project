@@ -46,6 +46,7 @@ class VocabularyProvider extends ChangeNotifier {
         return _vocabularyMap[level];
       }
     } catch (e) {
+      // await Future.delayed(const Duration(milliseconds: 1000));
       rethrow;
     }
   }
@@ -53,21 +54,27 @@ class VocabularyProvider extends ChangeNotifier {
   // 從遠端服務器獲取指定級別的詞彙數據
   Future<void> fetchVocabulary(String level) async {
     if (!_vocabularyMap.containsKey(level)) {
-      // 構建請求 URL
-      var url = Uri.parse(
-          'https://raw.githubusercontent.com/AppPeterPan/TaiwanSchoolEnglishVocabulary/main/$level.json');
-      var response = await http.get(url);
+      try {
+        // 構建請求 URL
+        var url = Uri.parse(
+            'https://raw.githubusercontent.com/AppPeterPan/TaiwanSchoolEnglishVocabulary/main/$level.json');
+        var response = await http.get(url);
 
-      if (response.statusCode == 200) {
-        // 解析響應 JSON 並轉換為 VocabularyEntry 列表
-        List<dynamic> jsonResponse = json.decode(response.body);
-        List<VocabularyEntry> vocabularyList =
-            jsonResponse.map((data) => VocabularyEntry.fromJson(data)).toList();
-        // 將詞彙列表存儲到 _vocabularyMap 中
-        _vocabularyMap[level] = vocabularyList;
-        notifyListeners();
-      } else {
-        throw Exception('Failed to load vocabulary for $level');
+        if (response.statusCode == 200) {
+          // 解析響應 JSON 並轉換為 VocabularyEntry 列表
+          List<dynamic> jsonResponse = json.decode(response.body);
+          List<VocabularyEntry> vocabularyList = jsonResponse
+              .map((data) => VocabularyEntry.fromJson(data))
+              .toList();
+          // 將詞彙列表存儲到 _vocabularyMap 中
+          _vocabularyMap[level] = vocabularyList;
+          notifyListeners();
+        } else {
+          throw ('獲取單字失敗');
+        }
+      } catch (e) {
+        // await Future.delayed(const Duration(milliseconds: 100));
+        throw ('獲取單字失敗');
       }
     }
   }
